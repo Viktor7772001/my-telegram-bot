@@ -20,7 +20,8 @@ if not API_TOKEN:
     exit(1)
 
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher()
+dp["bot"] = bot 
 
 # Инициализируем хранилище сообщений
 message_storage = MessageStorage()
@@ -264,7 +265,7 @@ async def clear_messages(message: types.Message):
 
 
 async def main():
-    await dp.start_polling()
+    await dp.start_polling(bot)
 
 if __name__ == '__main__':
     logger.info("Starting bot...")
