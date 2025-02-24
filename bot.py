@@ -2,7 +2,7 @@ import logging
 import os
 import asyncio
 from aiogram import Bot, Dispatcher, types
-from aiogram.utils import executor
+
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from config import config
 from storage import Message, MessageStorage
@@ -263,6 +263,9 @@ async def clear_messages(message: types.Message):
     logger.info(f"Cleared all messages for user {user_id}")
 
 
+async def main():
+    await dp.start_polling()
+
 if __name__ == '__main__':
     logger.info("Starting bot...")
-    executor.start_polling(dp, skip_updates=True)
+    asyncio.run(main())
