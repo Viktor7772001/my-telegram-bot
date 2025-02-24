@@ -1,7 +1,9 @@
 import logging
 import os
 import asyncio
-from aiogram import Bot, Dispatcher, types
+router = Router()  
+from aiogram import Bot, Dispatcher, types, Router  # Добавили Router
+from aiogram.filters import Command  # Добавили для обработки команд
 
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from config import config
@@ -20,8 +22,8 @@ if not API_TOKEN:
     exit(1)
 
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher()
-dp["bot"] = bot 
+dp = Dispatcher()  # Оставляем диспетчер
+dp.include_router(router)  # Подключаем роутер к диспетчеру 
 
 # Инициализируем хранилище сообщений
 message_storage = MessageStorage()
@@ -52,7 +54,7 @@ async def show_available_commands(message: types.Message):
     logger.info(f"Showing available commands to user {message.from_user.id}")
     await message.answer("\n🤖 Доступные команды:\n" + config.HELP_MESSAGE, reply_markup=remove_keyboard)
 
-@dp.message_handler(commands=['start', 'help', 'restart'])
+@router.message(Command('start', 'help', 'restart'))  # Заменили @dp на @router + Command()
 async def send_welcome(message: types.Message):
     """Обработчик команд /start, /help и /restart"""
     global reminder_sent
@@ -72,7 +74,7 @@ async def send_welcome(message: types.Message):
         await message.answer(config.HELP_MESSAGE, reply_markup=remove_keyboard)
         logger.info(f"Sent help message to user {user_id}")
 
-@dp.message_handler(lambda message: message.text == "🚀 Старт")
+@router.message_handler(lambda message: message.text == "🚀 Старт")
 async def handle_start_button(message: types.Message):
     """Обработчик нажатия кнопки Старт"""
     user_id = message.from_user.id
@@ -80,7 +82,7 @@ async def handle_start_button(message: types.Message):
     await message.answer(config.WELCOME_MESSAGE, reply_markup=remove_keyboard)
     logger.info(f"Sent welcome message after Start button to user {user_id}")
 
-@dp.message_handler(lambda message: message.text == '/rename')
+@router.message_handler(lambda message: message.text == '/rename')
 async def rename_participants(message: types.Message):
     """Обработчик команды переименования участников"""
     user_id = message.from_user.id
@@ -108,7 +110,7 @@ async def rename_participants(message: types.Message):
     )
     logger.info(f"Started rename process for user {user_id}, active: {message_storage.is_rename_active(chat_id)}")
 
-@dp.message_handler(lambda message: message_storage.is_rename_active(message.chat.id))
+@router.message_handler(lambda message: message_storage.is_rename_active(message.chat.id))
 async def process_rename(message: types.Message):
     """Обработчик ответов в процессе переименования"""
     user_id = message.from_user.id
@@ -167,7 +169,7 @@ async def process_rename(message: types.Message):
             await show_available_commands(message)
             logger.info(f"Completed rename process for user {user_id}")
 
-@dp.message_handler(commands=['continue'])
+@router.message_handler(Command('continue'))
 async def continue_adding(message: types.Message):
     """Продолжить добавление сообщений"""
     user_id = message.from_user.id
@@ -198,7 +200,7 @@ async def continue_adding(message: types.Message):
     await bot.send_message(chat_id, config.MERGE_REMINDER, reply_markup=remove_keyboard)
     logger.info(f"Sent delayed reminder to chat {chat_id}")
 
-@dp.message_handler(content_types=types.ContentType.ANY)
+@router.message()
 async def handle_message(message: types.Message):
     """Обработчик всех остальных сообщений"""
     # Пропускаем сообщения, если активен процесс переименования
@@ -257,7 +259,7 @@ async def handle_message(message: types.Message):
             await message.answer(config.INVALID_MESSAGE, reply_markup=remove_keyboard)
             logger.info(f"Received invalid message from user {user_id}")
 
-@dp.message_handler(commands=['clear'])
+@router.message(Command('clear'))
 async def clear_messages(message: types.Message):
     """Очистить сохраненные сообщения"""
     global reminder_sent
