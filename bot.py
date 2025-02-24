@@ -28,11 +28,17 @@ message_storage = MessageStorage()
 reminder_sent = False  # Флаг для отслеживания отправки напоминания
 
 # Создаем клавиатуру с кнопкой "Старт"
-start_keyboard = ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[])
-start_keyboard.add(KeyboardButton("🚀 Старт"))
+start_keyboard = ReplyKeyboardMarkup(
+    resize_keyboard=True,
+    keyboard=[
+        [KeyboardButton(text="🚀 Старт")]  # Кнопки передаются в виде списка списков
+    ]
+)
+
 
 # Создаем объект для удаления клавиатуры
-remove_keyboard = ReplyKeyboardRemove()
+remove_keyboard = ReplyKeyboardRemove(remove_keyboard=True)
+
 
 async def send_delayed_message(chat_id: int, delay: float = 2.0):
     """Отправить сообщение с задержкой"""
