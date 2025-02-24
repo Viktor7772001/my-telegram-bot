@@ -28,7 +28,7 @@ message_storage = MessageStorage()
 reminder_sent = False  # Флаг для отслеживания отправки напоминания
 
 # Создаем клавиатуру с кнопкой "Старт"
-start_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+start_keyboard = ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[])
 start_keyboard.add(KeyboardButton("🚀 Старт"))
 
 # Создаем объект для удаления клавиатуры
